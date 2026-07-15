@@ -29,7 +29,7 @@ Responses are deliberately **trimmed for LLM consumption** — raw NHTSA payload
 Requires [uv](https://docs.astral.sh/uv/) (it manages Python ≥3.11 for you).
 
 ```bash
-git clone https://github.com/AK186145/vehicle-safety-mcp.git
+git clone https://github.com/basit-khan-abdul/vehicle-safety-mcp.git
 cd vehicle-safety-mcp
 uv sync
 ```
