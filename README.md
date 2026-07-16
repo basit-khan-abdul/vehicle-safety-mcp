@@ -1,11 +1,10 @@
 # vehicle-safety-mcp
 
-[![CI](https://github.com/basit-khan-abdul/vehicle-safety-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/basit-khan-abdul/vehicle-safety-mcp/actions/workflows/ci.yml)
-[![Python 3.11 | 3.12](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![MCP](https://img.shields.io/badge/MCP-server-black)](https://modelcontextprotocol.io)
+[![CI](https://img.shields.io/github/actions/workflow/status/basit-khan-abdul/vehicle-safety-mcp/ci.yml?branch=main&style=flat&label=CI)](https://github.com/basit-khan-abdul/vehicle-safety-mcp/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/basit-khan-abdul/vehicle-safety-mcp?style=flat)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/basit-khan-abdul/vehicle-safety-mcp?style=flat)](https://github.com/basit-khan-abdul/vehicle-safety-mcp/releases)
 
-An [MCP](https://modelcontextprotocol.io) server that connects Claude to **NHTSA vehicle safety data** — VIN decoding, safety recalls, NCAP crash-test ratings, and consumer complaints. Ask Claude *"does my car have any open recalls?"* and get a real answer from the US government's own data.
+An [MCP](https://modelcontextprotocol.io) server that connects Claude to **NHTSA vehicle safety data** — VIN decoding, safety recalls, NCAP crash-test ratings, and consumer complaints. Ask Claude *"does my car have any recalls?"* and get a real answer from the US government's own data.
 
 Built on the free [NHTSA public APIs](https://www.nhtsa.gov/nhtsa-datasets-and-apis) — no API key required.
 
@@ -15,7 +14,7 @@ Vehicle safety data is public but painful: it lives across several government AP
 
 > **You:** Is a 2020 Honda Civic safe? Anything I should know before buying one?
 >
-> **Claude:** *(calls `get_safety_ratings` + `get_recalls` + `get_complaints`)* The 2020 Civic scored 5 stars overall in NCAP testing… it has 5 recall campaigns, most notably the fuel pump recall… the most complained-about component is…
+> **Claude:** *(calls `get_safety_ratings` + `get_recalls` + `get_complaints`)* The 2020 Civic earned a 5-star overall NCAP rating… it has a handful of recall campaigns worth knowing about… and the component owners complain about most is…
 
 ## Tools
 
@@ -69,6 +68,10 @@ Restart Claude Desktop; the tools appear under the 🔌 icon.
 - *"Compare crash-test ratings of a 2021 Toyota RAV4 and a 2021 Honda CR-V"*
 - *"What do owners complain about most on the 2019 Ford F-150?"*
 
+## Reliability
+
+Every NHTSA call runs with explicit connect and read timeouts and retries only transient failures — 5xx responses and connection/timeout errors — up to 3 attempts with exponential backoff and full jitter; client errors (4xx) fail fast and are never retried. When the upstream is genuinely unreachable, tools return a structured `{"error", "detail", "available": false}` payload the model can relay honestly, never a raw traceback into the MCP layer. Timeouts, attempt count, and backoff are all environment-tunable (see [Tuning](#tuning)). And because the NHTSA APIs are the real contract, a weekly scheduled job runs live smoke tests against them and opens a GitHub issue the moment a field or response shape drifts — so breakage surfaces before users do.
+
 ## Tests
 
 Two suites, split by what they prove:
@@ -77,9 +80,9 @@ Two suites, split by what they prove:
 - **Live** (`tests/live/`) — real NHTSA API smoke tests. The upstream contract *is* the product, so a weekly scheduled job ([contract-drift](.github/workflows/contract-drift.yml)) re-runs them and opens an issue if the API drifts — instead of making every push depend on a third-party API.
 
 ```bash
-uv run pytest tests/unit     # fast, offline — what CI runs on push
-uv run pytest tests/live     # hits the real NHTSA APIs
-uv run pytest -m "not live"  # everything except live
+uv run --extra dev pytest tests/unit     # fast, offline — what CI runs on push
+uv run --extra dev pytest tests/live     # hits the real NHTSA APIs
+uv run --extra dev pytest -m "not live"  # everything except live
 ```
 
 ## Design notes
@@ -87,7 +90,7 @@ uv run pytest -m "not live"  # everything except live
 - **Trimmed responses over raw passthrough.** Each NHTSA record is filtered to a curated field list (`nhtsa.py`). An LLM doesn't need 140 vPIC fields to say "it's a BMW X3".
 - **Composite tool for the common question.** `check_vin_recalls` chains decode → recall lookup because "does *my car* have recalls?" is the question real people ask — one tool call instead of two round trips.
 - **Bounded output everywhere.** Ratings capped at 5 variants, complaint narratives truncated at 400 chars, complaint list limited — tool output that scrolls forever helps nobody.
-- **Resilient by default.** Every NHTSA call has explicit connect/read timeouts and retries transient failures (5xx, connection errors, timeouts) up to 3 times with jittered backoff — but never retries a 4xx. When the upstream is genuinely down, tools return a structured `{"error": …, "available": false}` payload the model can relay honestly ("NHTSA data is currently unreachable; try again later") instead of surfacing a raw traceback.
+- **Resilient by default.** Every NHTSA call has explicit connect/read timeouts and retries transient failures (5xx, connection errors, timeouts) up to 3 attempts with jittered backoff — but never retries a 4xx. When the upstream is genuinely down, tools return a structured `{"error": …, "available": false}` payload the model can relay honestly ("NHTSA data is currently unreachable; try again later") instead of surfacing a raw traceback.
 
 ### Tuning
 
