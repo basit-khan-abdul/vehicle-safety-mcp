@@ -7,10 +7,24 @@ requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Basit Khan", email = "ab6031203@gmail.com" }]
 keywords = ["mcp", "nhtsa", "automotive", "vehicle-safety", "claude", "llm"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+]
 dependencies = [
     "mcp>=1.2.0",
     "httpx>=0.27.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/basit-khan-abdul/vehicle-safety-mcp"
+Repository = "https://github.com/basit-khan-abdul/vehicle-safety-mcp"
+Issues = "https://github.com/basit-khan-abdul/vehicle-safety-mcp/issues"
+Changelog = "https://github.com/basit-khan-abdul/vehicle-safety-mcp/blob/main/CHANGELOG.md"
 
 [project.scripts]
 vehicle-safety-mcp = "vehicle_safety_mcp.server:main"
@@ -27,3 +41,6 @@ packages = ["src/vehicle_safety_mcp"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+markers = [
+    "live: hits the real NHTSA APIs over the network (deselect with -m 'not live')",
+]

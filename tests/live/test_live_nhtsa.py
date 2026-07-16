@@ -1,20 +1,19 @@
 """Live smoke tests against the real NHTSA APIs.
 
-These hit the network on purpose — the point of this server is the upstream
-data, so the tests validate the actual contract, not a mock of it.
-Run: uv run pytest
+These hit the network on purpose — the upstream data is the product, so they
+validate the actual contract rather than a mock of it. They are marked `live`
+and excluded from the default push/PR CI; a weekly scheduled job
+(`.github/workflows/contract-drift.yml`) runs them and opens an issue if the
+NHTSA API contract drifts.
+
+Run explicitly:  uv run pytest tests/live
 """
 
 import pytest
 
 from vehicle_safety_mcp import nhtsa
 
-pytestmark = pytest.mark.anyio
-
-
-@pytest.fixture
-def anyio_backend():
-    return "asyncio"
+pytestmark = pytest.mark.live
 
 
 async def test_decode_vin():
