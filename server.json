@@ -1,0 +1,61 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.basit-khan-abdul/vehicle-safety-mcp",
+  "title": "Vehicle Safety (NHTSA)",
+  "description": "NHTSA vehicle safety data for Claude: VIN decoding, recalls, crash-test ratings, and complaints.",
+  "version": "0.2.0",
+  "repository": {
+    "url": "https://github.com/basit-khan-abdul/vehicle-safety-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://github.com/basit-khan-abdul/vehicle-safety-mcp#readme",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "vehicle-safety-mcp",
+      "version": "0.2.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "NHTSA_CONNECT_TIMEOUT",
+          "description": "Connection timeout in seconds for NHTSA API calls.",
+          "isRequired": false,
+          "isSecret": false,
+          "default": "5.0"
+        },
+        {
+          "name": "NHTSA_READ_TIMEOUT",
+          "description": "Response read timeout in seconds for NHTSA API calls.",
+          "isRequired": false,
+          "isSecret": false,
+          "default": "20.0"
+        },
+        {
+          "name": "NHTSA_MAX_ATTEMPTS",
+          "description": "Total attempts per request (1 disables retry).",
+          "isRequired": false,
+          "isSecret": false,
+          "default": "3"
+        },
+        {
+          "name": "NHTSA_BACKOFF_BASE",
+          "description": "Base backoff in seconds before jitter is applied.",
+          "isRequired": false,
+          "isSecret": false,
+          "default": "0.5"
+        },
+        {
+          "name": "NHTSA_BACKOFF_CAP",
+          "description": "Maximum backoff in seconds for any single retry.",
+          "isRequired": false,
+          "isSecret": false,
+          "default": "8.0"
+        }
+      ]
+    }
+  ]
+}
