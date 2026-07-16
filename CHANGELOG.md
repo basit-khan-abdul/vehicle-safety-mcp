@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Resilient HTTP layer for the NHTSA client: explicit connect/read timeouts,
+  bounded retry (max 3 attempts) with exponential backoff + full jitter for
+  transient failures only (5xx and connection/timeout errors — never 4xx), and
+  graceful degradation to a structured `{"error", "detail", "source",
+  "available": false}` payload an LLM can relay honestly instead of raising a
+  traceback into the MCP layer.
+- Env knobs: `NHTSA_CONNECT_TIMEOUT`, `NHTSA_READ_TIMEOUT`, `NHTSA_MAX_ATTEMPTS`,
+  `NHTSA_BACKOFF_BASE`, `NHTSA_BACKOFF_CAP`.
+- `tests/unit/test_resilience.py` — injects an `httpx.MockTransport` beneath the
+  client to exercise the real retry loop (500-then-200 recovery, no-retry-on-4xx,
+  capped attempts) and the timeout → degradation payload shape.
+
 ## [0.1.0] — 2026-07-15
 
 ### Added

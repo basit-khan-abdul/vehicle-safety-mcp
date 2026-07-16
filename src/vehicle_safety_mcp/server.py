@@ -54,6 +54,8 @@ async def check_vin_recalls(vin: str) -> dict[str, Any]:
     recalls?" — it chains VIN decoding into a recall search automatically.
     """
     vehicle = await nhtsa.decode_vin(vin)
+    if vehicle.get("available") is False:
+        return vehicle  # NHTSA was unreachable during decode — relay honestly
     make = vehicle.get("Make")
     model = vehicle.get("Model")
     year = vehicle.get("ModelYear")

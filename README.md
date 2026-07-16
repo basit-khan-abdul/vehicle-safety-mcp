@@ -87,6 +87,19 @@ uv run pytest -m "not live"  # everything except live
 - **Trimmed responses over raw passthrough.** Each NHTSA record is filtered to a curated field list (`nhtsa.py`). An LLM doesn't need 140 vPIC fields to say "it's a BMW X3".
 - **Composite tool for the common question.** `check_vin_recalls` chains decode → recall lookup because "does *my car* have recalls?" is the question real people ask — one tool call instead of two round trips.
 - **Bounded output everywhere.** Ratings capped at 5 variants, complaint narratives truncated at 400 chars, complaint list limited — tool output that scrolls forever helps nobody.
+- **Resilient by default.** Every NHTSA call has explicit connect/read timeouts and retries transient failures (5xx, connection errors, timeouts) up to 3 times with jittered backoff — but never retries a 4xx. When the upstream is genuinely down, tools return a structured `{"error": …, "available": false}` payload the model can relay honestly ("NHTSA data is currently unreachable; try again later") instead of surfacing a raw traceback.
+
+### Tuning
+
+The HTTP behaviour is env-configurable (sensible defaults shown):
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `NHTSA_CONNECT_TIMEOUT` | `5.0` | Connection timeout (seconds) |
+| `NHTSA_READ_TIMEOUT` | `20.0` | Response read timeout (seconds) |
+| `NHTSA_MAX_ATTEMPTS` | `3` | Total attempts per request (1 = no retry) |
+| `NHTSA_BACKOFF_BASE` | `0.5` | Base backoff (seconds) before jitter |
+| `NHTSA_BACKOFF_CAP` | `8.0` | Max backoff for any single retry (seconds) |
 
 ## MCP registries
 
