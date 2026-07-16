@@ -1,5 +1,3 @@
-# vehicle-safety-mcp v0.2.0
-
 An [MCP](https://modelcontextprotocol.io) server that connects Claude to **NHTSA
 vehicle safety data** — VIN decoding, safety recalls, NCAP crash-test ratings, and
 consumer complaints, straight from the US government's own APIs. No API key required.
