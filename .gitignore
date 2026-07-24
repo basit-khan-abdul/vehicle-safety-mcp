@@ -21,3 +21,25 @@ uv.lock
 .DS_Store
 .idea/
 .vscode/
+
+# ---- Env / secrets (Standing Rule 1 — never commit credentials) ----
+.env
+.env.*
+*.env
+!.env.example
+
+# Keys, certs, tokens — nothing that can carry a credential.
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.token
+*.pat
+*secret*
+*credential*
+.netrc
+id_rsa*
+
+# Local-only working context — not published.
+CLAUDE.md
